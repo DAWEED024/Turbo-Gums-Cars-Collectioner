@@ -41,6 +41,9 @@ const CARDS = CARD_DEFS.map(([brand, model], index) => {
   return { id, idStr, brand, model };
 });
 
+CARDS[118] = { ...CARDS[118], brand: 'Citroën', model: 'C5' };
+CARDS.splice(119, 0, { id: 119, idStr: '119s', displayId: '119', brand: 'Citroën', model: 'C5 Airscape Concept' });
+
 const qtyMap = loadQtyMap();
 let modalCard = null;
 let lastTap = 0;
@@ -119,20 +122,23 @@ function wireEvents() {
   });
 
   refs.grid.addEventListener('click', (event) => {
-    const tile = event.target.closest('[data-id]');
+    const tile = event.target.closest('[data-id-str]');
     if (!tile) return;
-    const id = Number(tile.dataset.id);
+    const idStr = tile.dataset.idStr;
 
     if (event.target.matches('.quick-toggle')) {
       event.stopPropagation();
-      const card = CARDS[id - 1];
+      const card = CARDS.find((entry) => entry.idStr === idStr);
+      if (!card) return;
       const qty = getQty(card.idStr);
       setQty(card.idStr, qty === 0 ? 1 : 0);
       render();
       return;
     }
 
-    openModal(CARDS[id - 1]);
+    const card = CARDS.find((entry) => entry.idStr === idStr);
+    if (!card) return;
+    openModal(card);
   });
 
   refs.closeModalBtn.addEventListener('click', closeModal);
@@ -198,7 +204,8 @@ function applyFiltersAndSort() {
 
     if (searchTokens.length === 0) return true;
 
-    const searchable = normalize(`${card.id} ${card.idStr} #${card.idStr} ${card.brand} ${card.model}`);
+    const displayId = card.displayId ?? card.idStr;
+    const searchable = normalize(`${card.id} ${card.idStr} ${displayId} #${displayId} ${card.brand} ${card.model}`);
     return searchTokens.every((token) => searchable.includes(token));
   });
 
@@ -225,22 +232,24 @@ function createCardTile(card) {
   const qty = getQty(card.idStr);
   const tile = document.createElement('article');
   tile.className = `card-tile ${qty > 0 ? 'owned' : 'missing'}`;
-  tile.dataset.id = card.id;
+  tile.dataset.idStr = card.idStr;
+
+  const displayId = card.displayId ?? card.idStr;
 
   const imagePath = `./assets/cards/${card.idStr}.png`;
 
   tile.innerHTML = `
     <div class="thumb-slot">
-      <img src="${imagePath}" alt="Karta ${card.idStr}: ${escapeHtml(card.brand)} ${escapeHtml(card.model)}" loading="lazy" decoding="async" />
+      <img src="${imagePath}" alt="Karta ${displayId}: ${escapeHtml(card.brand)} ${escapeHtml(card.model)}" loading="lazy" decoding="async" />
       <div class="img-fallback" hidden>Brak obrazka</div>
       ${qty >= 2 ? `<span class="qty-badge">${qty}x</span>` : ''}
     </div>
     <div class="card-meta">
-      <p class="card-sub">#${card.idStr}</p>
+      <p class="card-sub">#${displayId}</p>
       <h3 class="card-title">${escapeHtml(card.brand)} ${escapeHtml(card.model)}</h3>
       <div class="card-row">
         <label class="quick-check">
-          <input class="quick-toggle" type="checkbox" ${qty > 0 ? 'checked' : ''} aria-label="Przełącz posiadanie #${card.idStr}" />
+          <input class="quick-toggle" type="checkbox" ${qty > 0 ? 'checked' : ''} aria-label="Przełącz posiadanie #${displayId}" />
           Posiadam
         </label>
         <small>Ilość: ${qty}</small>
@@ -267,7 +276,8 @@ function openModal(card) {
 function refreshModal() {
   if (!modalCard) return;
   const qty = getQty(modalCard.idStr);
-  refs.modalTitle.textContent = `#${modalCard.idStr} — ${modalCard.brand}`;
+  const displayId = modalCard.displayId ?? modalCard.idStr;
+  refs.modalTitle.textContent = `#${displayId} — ${modalCard.brand}`;
   refs.modalSubtitle.textContent = modalCard.model;
   refs.modalQty.textContent = String(qty);
   refs.quickQty.value = String(qty);
@@ -275,14 +285,14 @@ function refreshModal() {
   refs.modalImage.hidden = false;
   refs.modalFallback.hidden = true;
   refs.modalImage.src = `./assets/cards/${modalCard.idStr}.png`;
-  refs.modalImage.alt = `Karta ${modalCard.idStr}: ${modalCard.brand} ${modalCard.model}`;
+  refs.modalImage.alt = `Karta ${displayId}: ${modalCard.brand} ${modalCard.model}`;
   refs.modalImage.onerror = () => {
     refs.modalImage.hidden = true;
     refs.modalFallback.hidden = false;
   };
 
   const { unique, total, missing } = computeStats();
-  refs.modalStats.textContent = `Unikalne: ${unique}/160 · Łącznie: ${total} szt. · Brakuje: ${missing}`;
+  refs.modalStats.textContent = `Unikalne: ${unique}/${CARDS.length} · Łącznie: ${total} szt. · Brakuje: ${missing}`;
 }
 
 function closeModal() {
@@ -304,7 +314,7 @@ function modalSetQty(nextQty) {
 
 function updateStats() {
   const { unique, total, missing } = computeStats();
-  refs.uniqueCount.textContent = `${unique}/160`;
+  refs.uniqueCount.textContent = `${unique}/${CARDS.length}`;
   refs.totalCount.textContent = `${total} szt.`;
   refs.missingCount.textContent = String(missing);
 }
@@ -319,7 +329,7 @@ function computeStats() {
     total += qty;
   }
 
-  return { unique, total, missing: 160 - unique };
+  return { unique, total, missing: CARDS.length - unique };
 }
 
 function getQty(idStr) {
@@ -371,7 +381,7 @@ function importJson() {
   try {
     const parsed = JSON.parse(refs.importTextarea.value.trim());
     if (!isValidImportMap(parsed)) {
-      refs.importMessage.textContent = 'Błąd walidacji: użyj mapy z kluczami 001..160 i wartościami >= 0.';
+      refs.importMessage.textContent = 'Błąd walidacji: użyj mapy z kluczami kart i wartościami >= 0.';
       return;
     }
 
@@ -396,10 +406,9 @@ function isValidImportMap(input) {
     if (!Number.isFinite(value) || value < 0) return false;
   }
 
+  const validKeys = new Set(CARDS.map((card) => card.idStr));
   for (const key of Object.keys(input)) {
-    if (!/^\d{3}$/.test(key)) return false;
-    const numeric = Number(key);
-    if (numeric < 1 || numeric > 160) return false;
+    if (!validKeys.has(key)) return false;
   }
 
   return true;
