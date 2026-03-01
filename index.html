@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Kolekcja Turbo Gums — 160 kart</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>Turbo Gums — Kolekcja kart</h1>
+        <p class="subtitle">Edytuj ilości, filtruj i rób kopie zapasowe offline.</p>
+      </div>
+      <div class="stats" id="globalStats" aria-live="polite">
+        <span>Unikalne: <strong id="uniqueCount">0/160</strong></span>
+        <span>Łącznie: <strong id="totalCount">0 szt.</strong></span>
+        <span>Brakuje: <strong id="missingCount">160</strong></span>
+      </div>
+    </header>
+
+    <section class="controls">
+      <label class="search-wrap">
+        <span>Wyszukaj</span>
+        <input id="searchInput" type="search" placeholder="np. 007 audi, skoda, ceed, #130" autocomplete="off" />
+      </label>
+
+      <label>
+        <span>Marka</span>
+        <select id="brandFilter">
+          <option value="">Wszystkie marki</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Sortowanie</span>
+        <select id="sortSelect">
+          <option value="id-asc">ID rosnąco</option>
+          <option value="id-desc">ID malejąco</option>
+          <option value="brand-asc">Marka A→Z</option>
+          <option value="brand-desc">Marka Z→A</option>
+          <option value="missing-first">Brakujące na górę</option>
+          <option value="duplicates-first">Duplikaty na górę</option>
+        </select>
+      </label>
+
+      <div class="toggles">
+        <label><input type="checkbox" id="ownedOnly" /> Tylko posiadane</label>
+        <label><input type="checkbox" id="missingOnly" /> Tylko brakujące</label>
+        <label><input type="checkbox" id="duplicatesOnly" /> Tylko duplikaty</label>
+      </div>
+
+      <div class="actions">
+        <button id="exportBtn" type="button">Export JSON</button>
+        <button id="importBtn" type="button">Import JSON</button>
+      </div>
+    </section>
+
+    <main>
+      <div class="grid" id="cardGrid" aria-live="polite"></div>
+      <p class="empty" id="emptyState" hidden>Brak wyników dla podanych filtrów.</p>
+    </main>
+  </div>
+
+  <dialog id="previewModal" class="modal">
+    <article class="modal-content">
+      <button class="close" id="closeModalBtn" aria-label="Zamknij podgląd">×</button>
+      <div class="modal-image-wrap">
+        <img id="modalImage" alt="Podgląd karty" />
+        <div id="modalFallback" class="img-fallback" hidden>Brak obrazka</div>
+      </div>
+      <div class="modal-info">
+        <h2 id="modalTitle">#001</h2>
+        <p id="modalSubtitle"></p>
+        <div class="qty-controls">
+          <button type="button" id="minusQty">−</button>
+          <output id="modalQty">0</output>
+          <button type="button" id="plusQty">+</button>
+          <button type="button" id="resetQty" class="danger">Wyzeruj</button>
+        </div>
+        <div class="quick-set">
+          <label for="quickQty">Ustaw ilość:</label>
+          <input id="quickQty" type="number" min="0" step="1" inputmode="numeric" />
+          <button id="applyQuickQty" type="button">Zastosuj</button>
+        </div>
+        <div class="modal-stats" id="modalStats"></div>
+      </div>
+    </article>
+  </dialog>
+
+  <dialog id="importDialog" class="modal small">
+    <article class="modal-content">
+      <button class="close" id="closeImportBtn" aria-label="Zamknij import">×</button>
+      <h2>Import JSON</h2>
+      <p>Wklej mapę ilości w formacie: { "001": 1, "002": 0, ... }</p>
+      <textarea id="importTextarea" rows="10" spellcheck="false"></textarea>
+      <div class="import-actions">
+        <button id="confirmImport" type="button">Importuj</button>
+      </div>
+      <p id="importMessage" class="import-message" aria-live="polite"></p>
+    </article>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
