@@ -20,7 +20,7 @@ const CARD_DEFS = [
   ['Kia', 'Cross GT'], ['Audi', 'A4'], ['Audi', 'A3 Cabriolet'], ['Toyota', 'FT-86 Open Concept'], ['Chevrolet', 'Tahoe'],
   ['Subaru', 'Legacy'], ['Chevrolet', 'Trailblazer'], ['Infiniti', 'Emerg-E'], ['Honda', 'EV-Ster'], ['Lamborghini', 'Gallardo LP550-2 Spyder'],
   ['Aston Martin', 'Vanquish'], ['Alfa Romeo', '4C Launch Edition'], ['Aston Martin', 'Lagonda'], ['Aston Martin', 'V12 Zagato'], ['BMW', 'i8 Spyder'],
-  ['Honda', 'Urban SUV'], ['Audi', 'A5'], ['Kia', 'Pro Cee’d'], ['BMW', 'X5 Security Plus'], ['Kia', 'Sportage'],
+  ['Honda', 'Urban SUV'], ['Audi', 'MetroProject Quattro'], ['Kia', 'Pro Cee’d'], ['BMW', 'X5 Security Plus'], ['Kia', 'Sportage'],
   ['Toyota', 'RAV4'], ['Toyota', 'Hilux Invincible'], ['BMW', 'i8'], ['Peugeot', '5008'], ['BMW', '4 Series M Performance'],
   ['Nissan', '370Z'], ['Mercedes', 'SL 400'], ['Nissan', 'GT-R'], ['Volkswagen', 'Scirocco'], ['Jaguar', 'C-X17'],
   ['BMW', 'X6'], ['Honda', 'Civic Type R'], ['Viper', 'SRT'], ['BMW', 'Z4'], ['Jaguar', 'XK Coupe'],
